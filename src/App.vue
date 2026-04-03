@@ -18,6 +18,8 @@ const {
   isAnimationPlaying,
   animationClips,
   activeAnimationIndex,
+  animationCurrentTime,
+  animationDuration,
   modelInfo,
   registerStageElements,
   setDragOver,
@@ -26,6 +28,7 @@ const {
   fitModel,
   setAnimationPlaying,
   selectAnimationClip,
+  seekAnimation,
   showEmptyHint
 } = useModelViewer()
 
@@ -55,6 +58,8 @@ function handleLocaleChange(nextLocale) {
       <ModelInfoPanel
         :active-animation-index="activeAnimationIndex"
         :animation-clips="animationClips"
+        :animation-current-time="animationCurrentTime"
+        :animation-duration="animationDuration"
         :has-animation="hasAnimation"
         :is-animation-playing="isAnimationPlaying"
         :model-info="modelInfo"
@@ -62,6 +67,7 @@ function handleLocaleChange(nextLocale) {
         @fit-model="fitModel"
         @reset-camera="resetCamera"
         @select-animation-clip="selectAnimationClip"
+        @seek-animation="seekAnimation"
         @set-animation-playing="setAnimationPlaying"
       />
     </main>

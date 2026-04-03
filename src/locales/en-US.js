@@ -16,6 +16,7 @@ export default {
     clip: 'Clip',
     noAnimations: 'This model does not contain animation clips',
     playSelected: 'Play selected clip',
+    timeline: 'Timeline',
     title: 'Animation'
   },
   language: {

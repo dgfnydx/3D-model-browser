@@ -3,12 +3,20 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
-const emit = defineEmits(['file-selected', 'fit-model', 'reset-camera', 'select-animation-clip', 'set-animation-playing'])
+const emit = defineEmits(['file-selected', 'fit-model', 'reset-camera', 'select-animation-clip', 'seek-animation', 'set-animation-playing'])
 
 const props = defineProps({
   activeAnimationIndex: {
     type: Number,
     default: -1
+  },
+  animationCurrentTime: {
+    type: Number,
+    default: 0
+  },
+  animationDuration: {
+    type: Number,
+    default: 0
   },
   animationClips: {
     type: Array,
@@ -47,12 +55,28 @@ const statItems = computed(() => [
   { key: 'bounds', label: t('info.bounds') }
 ])
 
+const animationProgress = computed(() => {
+  if (!props.animationDuration) return 0
+  return Math.min(props.animationCurrentTime, props.animationDuration)
+})
+
+const animationTimeLabel = computed(() => {
+  return `${formatTime(props.animationCurrentTime)} / ${formatTime(props.animationDuration)}`
+})
+
 function onFileChange(event) {
   const file = event.target.files?.[0]
   if (file) {
     emit('file-selected', file)
   }
   event.target.value = ''
+}
+
+function formatTime(seconds) {
+  const safeSeconds = Number.isFinite(seconds) ? Math.max(seconds, 0) : 0
+  const mins = Math.floor(safeSeconds / 60)
+  const secs = Math.floor(safeSeconds % 60)
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
 }
 </script>
 
@@ -76,7 +100,7 @@ function onFileChange(event) {
       </div>
     </section>
 
-    <section class="section-card">
+    <section v-if="props.hasAnimation" class="section-card">
       <button
         class="section-toggle"
         :title="animationCollapsed ? t('common.expand') : t('common.collapse')"
@@ -107,6 +131,23 @@ function onFileChange(event) {
           />
           <span>{{ t('animation.playSelected') }}</span>
         </label>
+
+        <div class="timeline-box" :class="{ disabled: !props.hasAnimation || !props.animationDuration }">
+          <div class="timeline-head">
+            <span>{{ t('animation.timeline') }}</span>
+            <span>{{ animationTimeLabel }}</span>
+          </div>
+          <input
+            class="timeline-slider"
+            :disabled="!props.hasAnimation || !props.animationDuration"
+            :max="props.animationDuration"
+            :step="0.01"
+            :value="animationProgress"
+            min="0"
+            type="range"
+            @input="emit('seek-animation', Number($event.target.value))"
+          />
+        </div>
 
         <div v-if="props.animationClips.length" class="clip-list" role="radiogroup">
           <label v-for="clip in props.animationClips" :key="clip.index" class="clip-item">
@@ -298,6 +339,33 @@ function onFileChange(event) {
 .clip-list {
   display: grid;
   gap: 8px;
+}
+
+.timeline-box {
+  padding: 10px 12px;
+  border: 1px solid rgba(143, 201, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.timeline-box.disabled {
+  opacity: 0.5;
+}
+
+.timeline-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.timeline-slider {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--accent);
 }
 
 .clip-item {

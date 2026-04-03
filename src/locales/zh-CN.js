@@ -16,6 +16,7 @@ export default {
     clip: '片段',
     noAnimations: '当前模型不包含动画片段',
     playSelected: '播放当前片段',
+    timeline: '时间轴',
     title: '动画'
   },
   language: {

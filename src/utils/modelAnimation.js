@@ -92,6 +92,31 @@ export function createAnimationController() {
     return shouldPlay ? resume() : pause()
   }
 
+  function getCurrentTime() {
+    if (!actions.length || activeIndex < 0) return 0
+    return actions[activeIndex].time || 0
+  }
+
+  function getDuration() {
+    if (!actions.length || activeIndex < 0) return 0
+    return actions[activeIndex].getClip().duration || 0
+  }
+
+  function setTime(time) {
+    if (!actions.length || activeIndex < 0) return false
+
+    const action = actions[activeIndex]
+    const duration = action.getClip().duration || 0
+    const nextTime = THREE.MathUtils.clamp(time, 0, duration)
+
+    action.paused = true
+    action.play()
+    action.time = nextTime
+    action.getMixer().update(0)
+    action.paused = !playing
+    return true
+  }
+
   function update(deltaSeconds) {
     if (!mixer || !playing || deltaSeconds <= 0) return
     mixer.update(deltaSeconds)
@@ -112,11 +137,14 @@ export function createAnimationController() {
   return {
     clear,
     getActiveIndex,
+    getCurrentTime,
+    getDuration,
     hasAnimations,
     isPlaying,
     load,
     play,
     setActiveClip,
+    setTime,
     setPlaying,
     update
   }

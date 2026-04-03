@@ -15,6 +15,8 @@ export function useModelViewer() {
   const isAnimationPlaying = ref(false)
   const animationClips = ref([])
   const activeAnimationIndex = ref(-1)
+  const animationCurrentTime = ref(0)
+  const animationDuration = ref(0)
   const modelInfo = reactive(createEmptyModelInfo())
   const animationController = createAnimationController()
   const clock = new THREE.Clock()
@@ -88,6 +90,8 @@ export function useModelViewer() {
     isAnimationPlaying.value = false
     animationClips.value = []
     activeAnimationIndex.value = -1
+    animationCurrentTime.value = 0
+    animationDuration.value = 0
     viewer.initialViewState = null
 
     if (!viewer.currentModelRoot) return
@@ -314,6 +318,8 @@ export function useModelViewer() {
     if (!viewer.controls || !viewer.renderer || !viewer.scene || !viewer.camera) return
 
     animationController.update(clock.getDelta())
+    animationCurrentTime.value = animationController.getCurrentTime()
+    animationDuration.value = animationController.getDuration()
     viewer.controls.update()
     viewer.renderer.render(viewer.scene, viewer.camera)
     renderAxesGizmo()
@@ -345,6 +351,8 @@ export function useModelViewer() {
       hasAnimation.value = animationController.load(viewer.currentModelRoot, animations)
       activeAnimationIndex.value = hasAnimation.value ? animationController.getActiveIndex() : -1
       isAnimationPlaying.value = false
+      animationCurrentTime.value = animationController.getCurrentTime()
+      animationDuration.value = animationController.getDuration()
       clock.getDelta()
 
       const stats = collectModelStats(viewer.currentModelRoot)
@@ -397,9 +405,21 @@ export function useModelViewer() {
     if (!changed) return
 
     activeAnimationIndex.value = index
+    animationCurrentTime.value = animationController.getCurrentTime()
+    animationDuration.value = animationController.getDuration()
     if (isAnimationPlaying.value) {
       clock.getDelta()
     }
+  }
+
+  function seekAnimation(time) {
+    if (!hasAnimation.value) return
+
+    const changed = animationController.setTime(time)
+    if (!changed) return
+
+    animationCurrentTime.value = animationController.getCurrentTime()
+    animationDuration.value = animationController.getDuration()
   }
 
   function setDragOver(value) {
@@ -444,6 +464,8 @@ export function useModelViewer() {
     isAnimationPlaying,
     animationClips,
     activeAnimationIndex,
+    animationCurrentTime,
+    animationDuration,
     modelInfo,
     registerStageElements,
     setDragOver,
@@ -452,6 +474,7 @@ export function useModelViewer() {
     fitModel,
     setAnimationPlaying,
     selectAnimationClip,
+    seekAnimation,
     showEmptyHint
   }
 }
