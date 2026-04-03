@@ -1,4 +1,4 @@
-# 主流 3D 模型查看器
+# 3D 模型查看器
 
 一个基于 `Vue 3 + Vite + Three.js` 的 3D 模型查看器，采用单文件组件和 `<script setup>` 语法实现。
 
@@ -37,9 +37,18 @@ npm run dev
 
 - `index.html`：Vite 入口 HTML
 - `src/main.js`：Vue 应用入口
-- `src/App.vue`：模型查看器主组件，使用 `<script setup>`
-- `src/style.css`：全局样式
+- `src/App.vue`：页面装配层，只负责组合组件
+- `src/components/`：界面组件，如头部、查看区域、信息面板
+- `src/composables/useModelViewer.js`：Three.js 查看器能力层
+- `src/utils/`：模型加载、统计、变换等可复用工具
+- `src/style.css`：全局布局与主题变量
 - `vite.config.js`：Vite 配置
+
+## 架构说明
+
+- `components` 只负责展示和交互分发，不承载 Three.js 业务细节
+- `composables` 负责场景初始化、渲染循环、模型导入和相机控制
+- `utils` 负责纯函数逻辑，便于复用与单独测试
 
 ## 说明
 
