@@ -1,8 +1,16 @@
 <script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppHeader from './components/AppHeader.vue'
 import ModelInfoPanel from './components/ModelInfoPanel.vue'
 import ModelViewerStage from './components/ModelViewerStage.vue'
 import { useModelViewer } from './composables/useModelViewer'
+import { setLocale } from './i18n'
+
+const { locale, t } = useI18n()
+
+const title = computed(() => t('app.title'))
+const subtitle = computed(() => t('app.subtitle'))
 
 const {
   isDragOver,
@@ -14,15 +22,21 @@ const {
   fitModel,
   showEmptyHint
 } = useModelViewer()
+
+function handleLocaleChange(nextLocale) {
+  setLocale(nextLocale)
+}
 </script>
 
 <template>
   <div class="app-shell">
     <AppHeader
-      title="3D 模型查看器"
-      subtitle="导入后即可旋转、缩放、平移，并查看模型统计信息。"
+      :current-locale="locale"
+      :subtitle="subtitle"
+      :title="title"
       @file-selected="handleFile"
       @fit-model="fitModel"
+      @locale-change="handleLocaleChange"
       @reset-camera="resetCamera"
     />
 

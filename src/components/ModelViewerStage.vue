@@ -1,5 +1,8 @@
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const emit = defineEmits(['file-drop', 'set-drag-over', 'stage-ready'])
 
@@ -50,9 +53,9 @@ onMounted(() => {
     <canvas ref="canvasEl" class="viewer-canvas"></canvas>
 
     <div v-if="showEmptyHint" class="empty-hint">
-      <p>把 3D 模型文件拖到这里，或点击“导入模型”</p>
-      <p class="hint-meta">支持 glTF / GLB / OBJ / FBX / STL</p>
-      <p class="hint-meta">左键旋转 · 滚轮缩放 · 右键平移</p>
+      <p>{{ t('viewer.emptyTitle') }}</p>
+      <p class="hint-meta">{{ t('viewer.supportedFormats') }}</p>
+      <p class="hint-meta">{{ t('viewer.interactions') }}</p>
     </div>
   </section>
 </template>

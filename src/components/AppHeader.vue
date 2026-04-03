@@ -1,7 +1,14 @@
 <script setup>
-const emit = defineEmits(['file-selected', 'fit-model', 'reset-camera'])
+import { useI18n } from 'vue-i18n'
+
+const emit = defineEmits(['file-selected', 'fit-model', 'locale-change', 'reset-camera'])
+const { t } = useI18n()
 
 defineProps({
+  currentLocale: {
+    type: String,
+    required: true
+  },
   title: {
     type: String,
     required: true
@@ -11,6 +18,11 @@ defineProps({
     default: ''
   }
 })
+
+const localeOptions = [
+  { value: 'zh-CN', labelKey: 'language.zhCN' },
+  { value: 'en-US', labelKey: 'language.enUS' }
+]
 
 function onFileChange(event) {
   const file = event.target.files?.[0]
@@ -29,8 +41,21 @@ function onFileChange(event) {
     </div>
 
     <div class="actions">
+      <div class="locale-switch">
+        <button
+          v-for="item in localeOptions"
+          :key="item.value"
+          class="locale-btn"
+          :class="{ active: currentLocale === item.value }"
+          type="button"
+          @click="emit('locale-change', item.value)"
+        >
+          {{ t(item.labelKey) }}
+        </button>
+      </div>
+
       <label class="btn primary">
-        导入模型
+        {{ t('actions.importModel') }}
         <input
           accept=".glb,.gltf,.obj,.fbx,.stl"
           class="hidden-input"
@@ -38,8 +63,8 @@ function onFileChange(event) {
           @change="onFileChange"
         />
       </label>
-      <button class="btn" type="button" @click="emit('reset-camera')">重置视角</button>
-      <button class="btn" type="button" @click="emit('fit-model')">模型居中</button>
+      <button class="btn" type="button" @click="emit('reset-camera')">{{ t('actions.resetCamera') }}</button>
+      <button class="btn" type="button" @click="emit('fit-model')">{{ t('actions.fitModel') }}</button>
     </div>
   </header>
 </template>
@@ -78,6 +103,29 @@ function onFileChange(event) {
   justify-content: flex-end;
   gap: 8px;
   flex: 0 0 auto;
+}
+
+.locale-switch {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.locale-btn {
+  min-height: 32px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.locale-btn.active {
+  background: rgba(103, 213, 255, 0.18);
+  color: var(--text);
 }
 
 .btn {

@@ -1,11 +1,13 @@
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import * as THREE from 'three'
+import { useI18n } from 'vue-i18n'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { normalizeAndFrameModel } from '../utils/modelTransform'
 import { applyDefaultMaterials, loadModelRoot } from '../utils/modelLoader'
 import { buildModelInfo, collectModelStats, createEmptyModelInfo } from '../utils/modelInfo'
 
 export function useModelViewer() {
+  const { t } = useI18n()
   const isDragOver = ref(false)
   const showEmptyHint = ref(true)
   const modelInfo = reactive(createEmptyModelInfo())
@@ -154,7 +156,7 @@ export function useModelViewer() {
     try {
       const { ext, root } = await loadModelRoot(file)
       if (!viewer.scene || !viewer.camera || !viewer.controls) {
-        throw new Error('查看器尚未初始化完成')
+        throw new Error(t('errors.viewerNotReady'))
       }
 
       applyDefaultMaterials(root)
@@ -170,7 +172,11 @@ export function useModelViewer() {
       showEmptyHint.value = false
     } catch (error) {
       console.error(error)
-      window.alert(`模型加载失败：${error.message}`)
+      const message = error.message === 'unsupported_format'
+        ? t('errors.unsupportedFormat', { format: file?.name?.split('.').pop()?.toUpperCase() || '-' })
+        : error.message
+
+      window.alert(t('errors.loadFailed', { message }))
     }
   }
 

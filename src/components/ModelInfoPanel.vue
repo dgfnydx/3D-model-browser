@@ -1,4 +1,9 @@
 <script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 const props = defineProps({
   modelInfo: {
     type: Object,
@@ -6,21 +11,21 @@ const props = defineProps({
   }
 })
 
-const statItems = [
-  { key: 'name', label: '名称' },
-  { key: 'format', label: '格式' },
-  { key: 'size', label: '文件大小' },
-  { key: 'meshes', label: '网格数量' },
-  { key: 'materials', label: '材质数量' },
-  { key: 'vertices', label: '顶点数量' },
-  { key: 'triangles', label: '三角面数量' },
-  { key: 'bounds', label: '包围盒尺寸' }
-]
+const statItems = computed(() => [
+  { key: 'name', label: t('info.name') },
+  { key: 'format', label: t('info.format') },
+  { key: 'size', label: t('info.size') },
+  { key: 'meshes', label: t('info.meshes') },
+  { key: 'materials', label: t('info.materials') },
+  { key: 'vertices', label: t('info.vertices') },
+  { key: 'triangles', label: t('info.triangles') },
+  { key: 'bounds', label: t('info.bounds') }
+])
 </script>
 
 <template>
   <aside class="info-panel">
-    <h2>模型信息</h2>
+    <h2>{{ t('info.title') }}</h2>
 
     <dl class="stats">
       <div v-for="item in statItems" :key="item.key">
@@ -30,11 +35,11 @@ const statItems = [
     </dl>
 
     <section class="help">
-      <h3>操作说明</h3>
+      <h3>{{ t('help.title') }}</h3>
       <ul>
-        <li>左键拖动：旋转模型</li>
-        <li>滚轮：缩放模型</li>
-        <li>右键拖动：平移视角</li>
+        <li>{{ t('help.rotate') }}</li>
+        <li>{{ t('help.zoom') }}</li>
+        <li>{{ t('help.pan') }}</li>
       </ul>
     </section>
   </aside>

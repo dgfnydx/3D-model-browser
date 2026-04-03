@@ -48,7 +48,7 @@ export async function loadModelRoot(file) {
     root = new THREE.Group()
     root.add(new THREE.Mesh(geometry, material))
   } else {
-    throw new Error(`暂不支持 ${ext || '该'} 格式`)
+    throw new Error('unsupported_format')
   }
 
   return { ext, root }
