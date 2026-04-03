@@ -3,10 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>3D 模型查看器</title>
+    <title>%VITE_SEO_TITLE%</title>
+    <meta name="description" content="%VITE_SEO_DESCRIPTION%" />
+    <meta name="keywords" content="%VITE_SEO_KEYWORDS%" />
+    <meta name="author" content="%VITE_SITE_NAME%" />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+    <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+    <meta name="theme-color" content="#09111f" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <link rel="canonical" href="%VITE_SITE_URL%/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:site_name" content="%VITE_SITE_NAME%" />
+    <meta property="og:title" content="%VITE_SEO_TITLE%" />
+    <meta property="og:description" content="%VITE_SEO_DESCRIPTION%" />
+    <meta property="og:url" content="%VITE_SITE_URL%/" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="%VITE_SEO_TITLE%" />
+    <meta name="twitter:description" content="%VITE_SEO_DESCRIPTION%" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "%VITE_SITE_NAME%",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Web",
+        "description": "%VITE_SEO_DESCRIPTION%",
+        "url": "%VITE_SITE_URL%/"
+      }
+    </script>
   </head>
   <body>
     <div id="app"></div>
+    <noscript>
+      <strong>该 3D 模型查看器需要启用 JavaScript 才能正常运行。</strong>
+    </noscript>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

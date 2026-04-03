@@ -33,6 +33,30 @@ npm install
 npm run dev
 ```
 
+## SEO 与收录
+
+- 项目已内置基础 SEO 能力：
+  - `title`、`description`、`keywords`
+  - `canonical`
+  - `Open Graph` / `Twitter Card`
+  - `SoftwareApplication` 结构化数据
+  - 构建时自动生成 `robots.txt` 和 `sitemap.xml`
+- 部署前请根据正式域名配置 `.env`：
+
+```bash
+cp .env.example .env
+```
+
+- 重点配置项：
+  - `VITE_SITE_URL`：线上正式地址，比如 `https://your-domain.com`
+  - `VITE_SITE_NAME`：站点名称
+  - `VITE_SEO_TITLE`：SEO 标题
+  - `VITE_SEO_DESCRIPTION`：SEO 描述
+  - `VITE_SEO_KEYWORDS`：SEO 关键词
+- 上线后建议尽快完成这两步：
+  - 在 Google Search Console / Bing Webmaster Tools 提交 `sitemap.xml`
+  - 确保正式站点允许搜索引擎抓取，并对首页做外链或站内入口曝光
+
 ## 文件结构
 
 - `index.html`：Vite 入口 HTML
