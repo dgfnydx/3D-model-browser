@@ -26,6 +26,12 @@ export default {
   actionsPanel: {
     title: '操作'
   },
+  displayMode: {
+    title: '显示模式',
+    solid: '实体',
+    wireframe: '线框',
+    xray: '透视'
+  },
   viewer: {
     emptyTitle: '把 3D 模型文件拖到这里，或点击“导入模型”',
     supportedFormats: '支持 glTF / GLB / OBJ / FBX / STL',
@@ -33,6 +39,11 @@ export default {
   },
   info: {
     title: '模型信息',
+    groups: {
+      basic: '基础',
+      skeleton: '骨骼',
+      material: '材质'
+    },
     name: '名称',
     format: '格式',
     size: '文件大小',

@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { useI18n } from 'vue-i18n'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { createAnimationController } from '../utils/modelAnimation'
+import { applyDisplayMode, DISPLAY_MODES } from '../utils/modelDisplay'
 import { normalizeAndFrameModel } from '../utils/modelTransform'
 import { applyDefaultMaterials, loadModelRoot } from '../utils/modelLoader'
 import { buildModelInfo, collectModelStats, createEmptyModelInfo } from '../utils/modelInfo'
@@ -17,6 +18,7 @@ export function useModelViewer() {
   const activeAnimationIndex = ref(-1)
   const animationCurrentTime = ref(0)
   const animationDuration = ref(0)
+  const displayMode = ref(DISPLAY_MODES.solid)
   const modelInfo = reactive(createEmptyModelInfo())
   const animationController = createAnimationController()
   const clock = new THREE.Clock()
@@ -55,6 +57,11 @@ export function useModelViewer() {
 
   function resetInfo() {
     Object.assign(modelInfo, createEmptyModelInfo())
+  }
+
+  function syncDisplayMode() {
+    if (!viewer.currentModelRoot) return
+    applyDisplayMode(viewer.currentModelRoot, displayMode.value)
   }
 
   function saveCurrentViewState() {
@@ -340,6 +347,7 @@ export function useModelViewer() {
       removeCurrentModel()
       viewer.currentModelRoot = root
       viewer.scene.add(viewer.currentModelRoot)
+      syncDisplayMode()
 
       normalizeAndFrameModel(viewer.currentModelRoot, viewer.camera, viewer.controls)
       saveCurrentViewState()
@@ -426,6 +434,13 @@ export function useModelViewer() {
     isDragOver.value = value
   }
 
+  function setDisplayMode(mode) {
+    if (!Object.values(DISPLAY_MODES).includes(mode)) return
+
+    displayMode.value = mode
+    syncDisplayMode()
+  }
+
   function cleanup() {
     if (viewer.animationId) window.cancelAnimationFrame(viewer.animationId)
     resizeObserver?.disconnect()
@@ -466,6 +481,7 @@ export function useModelViewer() {
     activeAnimationIndex,
     animationCurrentTime,
     animationDuration,
+    displayMode,
     modelInfo,
     registerStageElements,
     setDragOver,
@@ -475,6 +491,7 @@ export function useModelViewer() {
     setAnimationPlaying,
     selectAnimationClip,
     seekAnimation,
+    setDisplayMode,
     showEmptyHint
   }
 }

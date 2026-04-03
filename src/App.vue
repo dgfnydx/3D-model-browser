@@ -20,12 +20,14 @@ const {
   activeAnimationIndex,
   animationCurrentTime,
   animationDuration,
+  displayMode,
   modelInfo,
   registerStageElements,
   setDragOver,
   handleFile,
   resetCamera,
   fitModel,
+  setDisplayMode,
   setAnimationPlaying,
   selectAnimationClip,
   seekAnimation,
@@ -60,12 +62,14 @@ function handleLocaleChange(nextLocale) {
         :animation-clips="animationClips"
         :animation-current-time="animationCurrentTime"
         :animation-duration="animationDuration"
+        :display-mode="displayMode"
         :has-animation="hasAnimation"
         :is-animation-playing="isAnimationPlaying"
         :model-info="modelInfo"
         @file-selected="handleFile"
         @fit-model="fitModel"
         @reset-camera="resetCamera"
+        @set-display-mode="setDisplayMode"
         @select-animation-clip="selectAnimationClip"
         @seek-animation="seekAnimation"
         @set-animation-playing="setAnimationPlaying"

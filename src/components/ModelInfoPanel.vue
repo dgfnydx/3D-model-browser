@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
-const emit = defineEmits(['file-selected', 'fit-model', 'reset-camera', 'select-animation-clip', 'seek-animation', 'set-animation-playing'])
+const emit = defineEmits(['file-selected', 'fit-model', 'reset-camera', 'select-animation-clip', 'seek-animation', 'set-animation-playing', 'set-display-mode'])
 
 const props = defineProps({
   activeAnimationIndex: {
@@ -22,6 +22,10 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  displayMode: {
+    type: String,
+    default: 'solid'
+  },
   hasAnimation: {
     type: Boolean,
     default: false
@@ -36,23 +40,47 @@ const props = defineProps({
   }
 })
 
+const displayModeOptions = computed(() => [
+  { value: 'solid', label: t('displayMode.solid') },
+  { value: 'wireframe', label: t('displayMode.wireframe') },
+  { value: 'xray', label: t('displayMode.xray') }
+])
+
 const animationCollapsed = ref(false)
 const infoCollapsed = ref(false)
 const helpCollapsed = ref(false)
 
-const statItems = computed(() => [
-  { key: 'name', label: t('info.name') },
-  { key: 'format', label: t('info.format') },
-  { key: 'size', label: t('info.size') },
-  { key: 'skinnedMeshes', label: t('info.skinnedMeshes') },
-  { key: 'bones', label: t('info.bones') },
-  { key: 'meshes', label: t('info.meshes') },
-  { key: 'materials', label: t('info.materials') },
-  { key: 'materialTypes', label: t('info.materialTypes') },
-  { key: 'textures', label: t('info.textures') },
-  { key: 'vertices', label: t('info.vertices') },
-  { key: 'triangles', label: t('info.triangles') },
-  { key: 'bounds', label: t('info.bounds') }
+const statGroups = computed(() => [
+  {
+    key: 'basic',
+    title: t('info.groups.basic'),
+    items: [
+      { key: 'name', label: t('info.name') },
+      { key: 'format', label: t('info.format') },
+      { key: 'size', label: t('info.size') },
+      { key: 'meshes', label: t('info.meshes') },
+      { key: 'vertices', label: t('info.vertices') },
+      { key: 'triangles', label: t('info.triangles') },
+      { key: 'bounds', label: t('info.bounds') }
+    ]
+  },
+  {
+    key: 'skeleton',
+    title: t('info.groups.skeleton'),
+    items: [
+      { key: 'skinnedMeshes', label: t('info.skinnedMeshes') },
+      { key: 'bones', label: t('info.bones') }
+    ]
+  },
+  {
+    key: 'material',
+    title: t('info.groups.material'),
+    items: [
+      { key: 'materials', label: t('info.materials') },
+      { key: 'materialTypes', label: t('info.materialTypes') },
+      { key: 'textures', label: t('info.textures') }
+    ]
+  }
 ])
 
 const animationProgress = computed(() => {
@@ -97,6 +125,22 @@ function formatTime(seconds) {
         </label>
         <button class="tool-btn" type="button" @click="emit('reset-camera')">{{ t('actions.resetCamera') }}</button>
         <button class="tool-btn" type="button" @click="emit('fit-model')">{{ t('actions.fitModel') }}</button>
+      </div>
+
+      <div class="display-mode-panel">
+        <div class="panel-label">{{ t('displayMode.title') }}</div>
+        <div class="mode-switch" role="radiogroup" :aria-label="t('displayMode.title')">
+          <button
+            v-for="option in displayModeOptions"
+            :key="option.value"
+            class="mode-chip"
+            :class="{ active: props.displayMode === option.value }"
+            type="button"
+            @click="emit('set-display-mode', option.value)"
+          >
+            {{ option.label }}
+          </button>
+        </div>
       </div>
     </section>
 
@@ -186,12 +230,18 @@ function formatTime(seconds) {
         </span>
       </button>
 
-      <dl v-if="!infoCollapsed" class="stats">
-        <div v-for="item in statItems" :key="item.key">
-          <dt>{{ item.label }}</dt>
-          <dd>{{ props.modelInfo[item.key] }}</dd>
-        </div>
-      </dl>
+      <div v-if="!infoCollapsed" class="info-groups">
+        <section v-for="group in statGroups" :key="group.key" class="info-group">
+          <h3 class="group-title">{{ group.title }}</h3>
+
+          <dl class="stats">
+            <div v-for="item in group.items" :key="item.key">
+              <dt>{{ item.label }}</dt>
+              <dd>{{ props.modelInfo[item.key] }}</dd>
+            </div>
+          </dl>
+        </section>
+      </div>
     </section>
 
     <section class="section-card">
@@ -260,6 +310,56 @@ function formatTime(seconds) {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+.display-mode-panel {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(143, 201, 255, 0.08);
+}
+
+.panel-label {
+  color: var(--accent-2);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mode-switch {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.mode-chip {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid rgba(143, 201, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.mode-chip:hover {
+  border-color: rgba(143, 201, 255, 0.32);
+  color: var(--text);
+}
+
+.mode-chip.active {
+  color: #061826;
+  border-color: transparent;
+  background: linear-gradient(135deg, rgba(103, 213, 255, 0.92), rgba(142, 242, 221, 0.92));
+  box-shadow: 0 10px 20px rgba(15, 70, 96, 0.24);
 }
 
 .tool-btn {
@@ -446,9 +546,29 @@ function formatTime(seconds) {
 }
 
 .stats {
-  margin: 12px 0 0;
+  margin: 0;
   display: grid;
   gap: 8px;
+}
+
+.info-groups {
+  margin-top: 12px;
+  display: grid;
+  gap: 12px;
+}
+
+.info-group {
+  display: grid;
+  gap: 10px;
+}
+
+.group-title {
+  margin: 0;
+  color: var(--accent-2);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .stats div {
@@ -490,6 +610,10 @@ function formatTime(seconds) {
 
 @media (max-width: 980px) {
   .tool-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .mode-switch {
     grid-template-columns: 1fr;
   }
 

@@ -26,6 +26,12 @@ export default {
   actionsPanel: {
     title: 'Actions'
   },
+  displayMode: {
+    title: 'Display Mode',
+    solid: 'Solid',
+    wireframe: 'Wireframe',
+    xray: 'X-Ray'
+  },
   viewer: {
     emptyTitle: 'Drop a 3D model here, or click "Import Model".',
     supportedFormats: 'Supports glTF / GLB / OBJ / FBX / STL',
@@ -33,6 +39,11 @@ export default {
   },
   info: {
     title: 'Model Info',
+    groups: {
+      basic: 'Basic',
+      skeleton: 'Skeleton',
+      material: 'Material'
+    },
     name: 'Name',
     format: 'Format',
     size: 'File Size',
