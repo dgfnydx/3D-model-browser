@@ -9,17 +9,21 @@ export default {
   },
   actions: {
     importModel: '导入模型',
-    pauseAnimation: '暂停动画',
-    playAnimation: '播放动画',
     resetCamera: '重置视角',
     fitModel: '模型居中'
+  },
+  animation: {
+    clip: '片段',
+    noAnimations: '当前模型不包含动画片段',
+    playSelected: '播放当前片段',
+    title: '动画'
   },
   language: {
     zhCN: '中文',
     enUS: 'EN'
   },
-  tools: {
-    title: '工具'
+  actionsPanel: {
+    title: '操作'
   },
   viewer: {
     emptyTitle: '把 3D 模型文件拖到这里，或点击“导入模型”',

@@ -3,9 +3,17 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
-const emit = defineEmits(['file-selected', 'fit-model', 'reset-camera', 'toggle-animation'])
+const emit = defineEmits(['file-selected', 'fit-model', 'reset-camera', 'select-animation-clip', 'set-animation-playing'])
 
 const props = defineProps({
+  activeAnimationIndex: {
+    type: Number,
+    default: -1
+  },
+  animationClips: {
+    type: Array,
+    default: () => []
+  },
   hasAnimation: {
     type: Boolean,
     default: false
@@ -20,6 +28,7 @@ const props = defineProps({
   }
 })
 
+const animationCollapsed = ref(false)
 const infoCollapsed = ref(false)
 const helpCollapsed = ref(false)
 
@@ -46,7 +55,7 @@ function onFileChange(event) {
 <template>
   <aside class="info-panel">
     <section class="tool-panel">
-      <h2>{{ t('tools.title') }}</h2>
+      <h2>{{ t('actionsPanel.title') }}</h2>
 
       <div class="tool-actions">
         <label class="tool-btn tool-btn-primary">
@@ -58,16 +67,56 @@ function onFileChange(event) {
             @change="onFileChange"
           />
         </label>
-        <button
-          class="tool-btn"
-          :disabled="!props.hasAnimation"
-          type="button"
-          @click="emit('toggle-animation')"
-        >
-          {{ props.isAnimationPlaying ? t('actions.pauseAnimation') : t('actions.playAnimation') }}
-        </button>
         <button class="tool-btn" type="button" @click="emit('reset-camera')">{{ t('actions.resetCamera') }}</button>
         <button class="tool-btn" type="button" @click="emit('fit-model')">{{ t('actions.fitModel') }}</button>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <button
+        class="section-toggle"
+        :title="animationCollapsed ? t('common.expand') : t('common.collapse')"
+        type="button"
+        @click="animationCollapsed = !animationCollapsed"
+      >
+        <span>{{ t('animation.title') }}</span>
+        <span class="toggle-icon" :class="{ collapsed: animationCollapsed }" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none">
+            <path
+              d="M3.5 6 8 10.5 12.5 6"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.8"
+            />
+          </svg>
+        </span>
+      </button>
+
+      <div v-if="!animationCollapsed" class="animation-panel">
+        <label class="play-checkbox" :class="{ disabled: !props.hasAnimation }">
+          <input
+            :checked="props.isAnimationPlaying"
+            :disabled="!props.hasAnimation || props.activeAnimationIndex === -1"
+            type="checkbox"
+            @change="emit('set-animation-playing', $event.target.checked)"
+          />
+          <span>{{ t('animation.playSelected') }}</span>
+        </label>
+
+        <div v-if="props.animationClips.length" class="clip-list" role="radiogroup">
+          <label v-for="clip in props.animationClips" :key="clip.index" class="clip-item">
+            <input
+              :checked="props.activeAnimationIndex === clip.index"
+              name="animation-clip"
+              type="radio"
+              @change="emit('select-animation-clip', clip.index)"
+            />
+            <span>{{ clip.name }}</span>
+          </label>
+        </div>
+
+        <p v-else class="empty-text">{{ t('animation.noAnimations') }}</p>
       </div>
     </section>
 
@@ -201,6 +250,47 @@ function onFileChange(event) {
 
 .hidden-input {
   display: none;
+}
+
+.animation-panel {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.play-checkbox,
+.clip-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+}
+
+.play-checkbox.disabled {
+  opacity: 0.5;
+}
+
+.play-checkbox input,
+.clip-item input {
+  accent-color: var(--accent);
+}
+
+.clip-list {
+  display: grid;
+  gap: 8px;
+}
+
+.clip-item {
+  padding: 10px 12px;
+  border: 1px solid rgba(143, 201, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.empty-text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .section-toggle {

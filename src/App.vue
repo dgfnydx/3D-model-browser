@@ -16,13 +16,16 @@ const {
   isDragOver,
   hasAnimation,
   isAnimationPlaying,
+  animationClips,
+  activeAnimationIndex,
   modelInfo,
   registerStageElements,
   setDragOver,
   handleFile,
   resetCamera,
   fitModel,
-  toggleAnimation,
+  setAnimationPlaying,
+  selectAnimationClip,
   showEmptyHint
 } = useModelViewer()
 
@@ -50,13 +53,16 @@ function handleLocaleChange(nextLocale) {
       />
 
       <ModelInfoPanel
+        :active-animation-index="activeAnimationIndex"
+        :animation-clips="animationClips"
         :has-animation="hasAnimation"
         :is-animation-playing="isAnimationPlaying"
         :model-info="modelInfo"
         @file-selected="handleFile"
         @fit-model="fitModel"
         @reset-camera="resetCamera"
-        @toggle-animation="toggleAnimation"
+        @select-animation-clip="selectAnimationClip"
+        @set-animation-playing="setAnimationPlaying"
       />
     </main>
   </div>

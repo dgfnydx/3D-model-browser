@@ -3,12 +3,14 @@ import * as THREE from 'three'
 export function createAnimationController() {
   let mixer = null
   let actions = []
+  let activeIndex = -1
   let playing = false
 
   function clear() {
     actions.forEach((action) => action.stop())
     actions = []
     mixer = null
+    activeIndex = -1
     playing = false
   }
 
@@ -24,37 +26,63 @@ export function createAnimationController() {
       const action = mixer.clipAction(clip)
       action.reset()
       action.setLoop(THREE.LoopRepeat)
+      action.clampWhenFinished = false
       return action
     })
+
+    activeIndex = actions.length ? 0 : -1
+
+    return true
+  }
+
+  function stopAll() {
+    actions.forEach((action) => {
+      action.stop()
+      action.paused = false
+    })
+  }
+
+  function setActiveClip(index) {
+    if (!actions.length || index < 0 || index >= actions.length) return false
+
+    const wasPlaying = playing
+    stopAll()
+    activeIndex = index
+    playing = false
+
+    if (wasPlaying) {
+      return play()
+    }
 
     return true
   }
 
   function play() {
-    if (!actions.length) return false
+    if (!actions.length || activeIndex < 0) return false
 
-    actions.forEach((action) => action.play())
+    stopAll()
+    const action = actions[activeIndex]
+    action.reset()
+    action.paused = false
+    action.play()
     playing = true
     return true
   }
 
   function pause() {
-    if (!actions.length) return false
+    if (!actions.length || activeIndex < 0) return false
 
-    actions.forEach((action) => {
-      action.paused = true
-    })
+    actions[activeIndex].paused = true
     playing = false
     return true
   }
 
   function resume() {
-    if (!actions.length) return false
+    if (!actions.length || activeIndex < 0) return false
 
-    actions.forEach((action) => {
-      action.paused = false
-      action.play()
-    })
+    const action = actions[activeIndex]
+    action.paused = false
+    action.play()
     playing = true
     return true
   }
@@ -73,16 +101,22 @@ export function createAnimationController() {
     return actions.length > 0
   }
 
+  function getActiveIndex() {
+    return activeIndex
+  }
+
   function isPlaying() {
     return playing
   }
 
   return {
     clear,
+    getActiveIndex,
     hasAnimations,
     isPlaying,
     load,
     play,
+    setActiveClip,
     setPlaying,
     update
   }

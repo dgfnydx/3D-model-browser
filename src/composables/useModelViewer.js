@@ -13,6 +13,8 @@ export function useModelViewer() {
   const showEmptyHint = ref(true)
   const hasAnimation = ref(false)
   const isAnimationPlaying = ref(false)
+  const animationClips = ref([])
+  const activeAnimationIndex = ref(-1)
   const modelInfo = reactive(createEmptyModelInfo())
   const animationController = createAnimationController()
   const clock = new THREE.Clock()
@@ -54,6 +56,8 @@ export function useModelViewer() {
     animationController.clear()
     hasAnimation.value = false
     isAnimationPlaying.value = false
+    animationClips.value = []
+    activeAnimationIndex.value = -1
 
     if (!viewer.currentModelRoot) return
 
@@ -177,8 +181,13 @@ export function useModelViewer() {
 
       normalizeAndFrameModel(viewer.currentModelRoot, viewer.camera, viewer.controls)
 
+      animationClips.value = animations.map((clip, index) => ({
+        index,
+        name: clip.name?.trim() || `${t('animation.clip')} ${index + 1}`
+      }))
       hasAnimation.value = animationController.load(viewer.currentModelRoot, animations)
-      isAnimationPlaying.value = hasAnimation.value ? animationController.play() : false
+      activeAnimationIndex.value = hasAnimation.value ? animationController.getActiveIndex() : -1
+      isAnimationPlaying.value = false
       clock.getDelta()
 
       const stats = collectModelStats(viewer.currentModelRoot)
@@ -208,13 +217,24 @@ export function useModelViewer() {
     }
   }
 
-  function toggleAnimation() {
+  function setAnimationPlaying(checked) {
     if (!hasAnimation.value) return
 
-    const nextPlaying = !isAnimationPlaying.value
-    const changed = animationController.setPlaying(nextPlaying)
+    const changed = animationController.setPlaying(checked)
     if (changed) {
-      isAnimationPlaying.value = nextPlaying
+      isAnimationPlaying.value = checked
+      clock.getDelta()
+    }
+  }
+
+  function selectAnimationClip(index) {
+    if (!hasAnimation.value) return
+
+    const changed = animationController.setActiveClip(index)
+    if (!changed) return
+
+    activeAnimationIndex.value = index
+    if (isAnimationPlaying.value) {
       clock.getDelta()
     }
   }
@@ -257,13 +277,16 @@ export function useModelViewer() {
     isDragOver,
     hasAnimation,
     isAnimationPlaying,
+    animationClips,
+    activeAnimationIndex,
     modelInfo,
     registerStageElements,
     setDragOver,
     handleFile,
     resetCamera,
     fitModel,
-    toggleAnimation,
+    setAnimationPlaying,
+    selectAnimationClip,
     showEmptyHint
   }
 }

@@ -9,17 +9,21 @@ export default {
   },
   actions: {
     importModel: 'Import Model',
-    pauseAnimation: 'Pause Animation',
-    playAnimation: 'Play Animation',
     resetCamera: 'Reset View',
     fitModel: 'Fit Model'
+  },
+  animation: {
+    clip: 'Clip',
+    noAnimations: 'This model does not contain animation clips',
+    playSelected: 'Play selected clip',
+    title: 'Animation'
   },
   language: {
     zhCN: '中文',
     enUS: 'EN'
   },
-  tools: {
-    title: 'Tools'
+  actionsPanel: {
+    title: 'Actions'
   },
   viewer: {
     emptyTitle: 'Drop a 3D model here, or click "Import Model".',
