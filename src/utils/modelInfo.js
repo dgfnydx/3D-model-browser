@@ -5,8 +5,12 @@ export function createEmptyModelInfo() {
     name: '-',
     format: '-',
     size: '-',
+    skinnedMeshes: '-',
+    bones: '-',
     meshes: '-',
     materials: '-',
+    materialTypes: '-',
+    textures: '-',
     vertices: '-',
     triangles: '-',
     bounds: '-'
@@ -30,15 +34,28 @@ export function formatBytes(bytes) {
 }
 
 export function collectModelStats(root) {
+  let boneCount = 0
   let meshCount = 0
+  let skinnedMeshCount = 0
+  let textureCount = 0
   let vertexCount = 0
   let triangleCount = 0
+  const boneSet = new Set()
   const materialSet = new Set()
+  const materialTypeSet = new Set()
+  const textureSet = new Set()
 
   root.traverse((child) => {
+    if (child.isBone) {
+      boneSet.add(child.uuid)
+    }
+
     if (!child.isMesh || !child.geometry) return
 
     meshCount += 1
+    if (child.isSkinnedMesh) {
+      skinnedMeshCount += 1
+    }
 
     const geometry = child.geometry
     const position = geometry.attributes?.position
@@ -53,22 +70,45 @@ export function collectModelStats(root) {
 
     if (Array.isArray(child.material)) {
       child.material.forEach((material) => {
-        if (material) materialSet.add(material.uuid)
+        if (!material) return
+
+        materialSet.add(material.uuid)
+        materialTypeSet.add(material.type)
+
+        for (const value of Object.values(material)) {
+          if (value?.isTexture) {
+            textureSet.add(value.uuid)
+          }
+        }
       })
     } else if (child.material) {
       materialSet.add(child.material.uuid)
+      materialTypeSet.add(child.material.type)
+
+      for (const value of Object.values(child.material)) {
+        if (value?.isTexture) {
+          textureSet.add(value.uuid)
+        }
+      }
     }
   })
+
+  boneCount = boneSet.size
+  textureCount = textureSet.size
 
   const bbox = new THREE.Box3().setFromObject(root)
   const size = new THREE.Vector3()
   bbox.getSize(size)
 
   return {
+    boneCount,
     meshCount,
+    skinnedMeshCount,
+    textureCount,
     vertexCount,
     triangleCount,
     materialCount: materialSet.size,
+    materialTypes: [...materialTypeSet],
     size
   }
 }
@@ -78,8 +118,12 @@ export function buildModelInfo(file, ext, stats) {
     name: file.name,
     format: ext.toUpperCase(),
     size: formatBytes(file.size),
+    skinnedMeshes: stats.skinnedMeshCount.toLocaleString('zh-CN'),
+    bones: stats.boneCount.toLocaleString('zh-CN'),
     meshes: stats.meshCount.toLocaleString('zh-CN'),
     materials: stats.materialCount.toLocaleString('zh-CN'),
+    materialTypes: stats.materialTypes.length ? stats.materialTypes.join(', ') : '-',
+    textures: stats.textureCount.toLocaleString('zh-CN'),
     vertices: stats.vertexCount.toLocaleString('zh-CN'),
     triangles: stats.triangleCount.toLocaleString('zh-CN'),
     bounds: `${stats.size.x.toFixed(3)} x ${stats.size.y.toFixed(3)} x ${stats.size.z.toFixed(3)}`

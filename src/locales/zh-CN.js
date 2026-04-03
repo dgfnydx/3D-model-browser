@@ -35,8 +35,12 @@ export default {
     name: '名称',
     format: '格式',
     size: '文件大小',
+    skinnedMeshes: '蒙皮网格数',
+    bones: '骨骼数量',
     meshes: '网格数量',
     materials: '材质数量',
+    materialTypes: '材质类型',
+    textures: '贴图数量',
     vertices: '顶点数量',
     triangles: '三角面数量',
     bounds: '包围盒尺寸'

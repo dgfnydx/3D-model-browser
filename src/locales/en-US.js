@@ -35,8 +35,12 @@ export default {
     name: 'Name',
     format: 'Format',
     size: 'File Size',
+    skinnedMeshes: 'Skinned Meshes',
+    bones: 'Bones',
     meshes: 'Meshes',
     materials: 'Materials',
+    materialTypes: 'Material Types',
+    textures: 'Textures',
     vertices: 'Vertices',
     triangles: 'Triangles',
     bounds: 'Bounding Box'

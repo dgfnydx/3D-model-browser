@@ -36,8 +36,12 @@ const statItems = computed(() => [
   { key: 'name', label: t('info.name') },
   { key: 'format', label: t('info.format') },
   { key: 'size', label: t('info.size') },
+  { key: 'skinnedMeshes', label: t('info.skinnedMeshes') },
+  { key: 'bones', label: t('info.bones') },
   { key: 'meshes', label: t('info.meshes') },
   { key: 'materials', label: t('info.materials') },
+  { key: 'materialTypes', label: t('info.materialTypes') },
+  { key: 'textures', label: t('info.textures') },
   { key: 'vertices', label: t('info.vertices') },
   { key: 'triangles', label: t('info.triangles') },
   { key: 'bounds', label: t('info.bounds') }
