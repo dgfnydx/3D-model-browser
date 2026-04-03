@@ -3,14 +3,23 @@ export default {
     title: '3D 模型查看器',
     subtitle: '导入后即可旋转、缩放、平移，并查看模型统计信息。'
   },
+  common: {
+    collapse: '收起',
+    expand: '展开'
+  },
   actions: {
     importModel: '导入模型',
+    pauseAnimation: '暂停动画',
+    playAnimation: '播放动画',
     resetCamera: '重置视角',
     fitModel: '模型居中'
   },
   language: {
     zhCN: '中文',
     enUS: 'EN'
+  },
+  tools: {
+    title: '工具'
   },
   viewer: {
     emptyTitle: '把 3D 模型文件拖到这里，或点击“导入模型”',

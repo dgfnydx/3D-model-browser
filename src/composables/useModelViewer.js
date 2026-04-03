@@ -2,6 +2,7 @@ import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import * as THREE from 'three'
 import { useI18n } from 'vue-i18n'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { createAnimationController } from '../utils/modelAnimation'
 import { normalizeAndFrameModel } from '../utils/modelTransform'
 import { applyDefaultMaterials, loadModelRoot } from '../utils/modelLoader'
 import { buildModelInfo, collectModelStats, createEmptyModelInfo } from '../utils/modelInfo'
@@ -10,7 +11,11 @@ export function useModelViewer() {
   const { t } = useI18n()
   const isDragOver = ref(false)
   const showEmptyHint = ref(true)
+  const hasAnimation = ref(false)
+  const isAnimationPlaying = ref(false)
   const modelInfo = reactive(createEmptyModelInfo())
+  const animationController = createAnimationController()
+  const clock = new THREE.Clock()
 
   const viewer = {
     scene: null,
@@ -46,6 +51,10 @@ export function useModelViewer() {
   }
 
   function removeCurrentModel() {
+    animationController.clear()
+    hasAnimation.value = false
+    isAnimationPlaying.value = false
+
     if (!viewer.currentModelRoot) return
 
     viewer.scene.remove(viewer.currentModelRoot)
@@ -145,6 +154,7 @@ export function useModelViewer() {
   function animate() {
     if (!viewer.controls || !viewer.renderer || !viewer.scene || !viewer.camera) return
 
+    animationController.update(clock.getDelta())
     viewer.controls.update()
     viewer.renderer.render(viewer.scene, viewer.camera)
     viewer.animationId = window.requestAnimationFrame(animate)
@@ -154,7 +164,7 @@ export function useModelViewer() {
     if (!file) return
 
     try {
-      const { ext, root } = await loadModelRoot(file)
+      const { animations, ext, root } = await loadModelRoot(file)
       if (!viewer.scene || !viewer.camera || !viewer.controls) {
         throw new Error(t('errors.viewerNotReady'))
       }
@@ -166,6 +176,10 @@ export function useModelViewer() {
       viewer.scene.add(viewer.currentModelRoot)
 
       normalizeAndFrameModel(viewer.currentModelRoot, viewer.camera, viewer.controls)
+
+      hasAnimation.value = animationController.load(viewer.currentModelRoot, animations)
+      isAnimationPlaying.value = hasAnimation.value ? animationController.play() : false
+      clock.getDelta()
 
       const stats = collectModelStats(viewer.currentModelRoot)
       Object.assign(modelInfo, buildModelInfo(file, ext, stats))
@@ -191,6 +205,17 @@ export function useModelViewer() {
   function fitModel() {
     if (viewer.currentModelRoot) {
       normalizeAndFrameModel(viewer.currentModelRoot, viewer.camera, viewer.controls)
+    }
+  }
+
+  function toggleAnimation() {
+    if (!hasAnimation.value) return
+
+    const nextPlaying = !isAnimationPlaying.value
+    const changed = animationController.setPlaying(nextPlaying)
+    if (changed) {
+      isAnimationPlaying.value = nextPlaying
+      clock.getDelta()
     }
   }
 
@@ -230,12 +255,15 @@ export function useModelViewer() {
 
   return {
     isDragOver,
+    hasAnimation,
+    isAnimationPlaying,
     modelInfo,
     registerStageElements,
     setDragOver,
     handleFile,
     resetCamera,
     fitModel,
+    toggleAnimation,
     showEmptyHint
   }
 }

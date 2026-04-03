@@ -25,11 +25,13 @@ export async function loadModelRoot(file) {
   const ext = getExtension(file.name)
   const arrayBuffer = await file.arrayBuffer()
   let root = null
+  let animations = []
 
   if (ext === 'glb' || ext === 'gltf') {
     const loader = new GLTFLoader()
     const gltf = await loader.parseAsync(arrayBuffer, '')
     root = gltf.scene
+    animations = gltf.animations || []
   } else if (ext === 'obj') {
     const loader = new OBJLoader()
     const text = new TextDecoder().decode(arrayBuffer)
@@ -37,6 +39,7 @@ export async function loadModelRoot(file) {
   } else if (ext === 'fbx') {
     const loader = new FBXLoader()
     root = loader.parse(arrayBuffer, '')
+    animations = root.animations || []
   } else if (ext === 'stl') {
     const loader = new STLLoader()
     const geometry = loader.parse(arrayBuffer)
@@ -51,5 +54,5 @@ export async function loadModelRoot(file) {
     throw new Error('unsupported_format')
   }
 
-  return { ext, root }
+  return { animations, ext, root }
 }

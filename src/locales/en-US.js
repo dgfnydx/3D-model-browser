@@ -3,14 +3,23 @@ export default {
     title: '3D Model Viewer',
     subtitle: 'Import a model to rotate, zoom, pan, and inspect key statistics.'
   },
+  common: {
+    collapse: 'Collapse',
+    expand: 'Expand'
+  },
   actions: {
     importModel: 'Import Model',
+    pauseAnimation: 'Pause Animation',
+    playAnimation: 'Play Animation',
     resetCamera: 'Reset View',
     fitModel: 'Fit Model'
   },
   language: {
     zhCN: '中文',
     enUS: 'EN'
+  },
+  tools: {
+    title: 'Tools'
   },
   viewer: {
     emptyTitle: 'Drop a 3D model here, or click "Import Model".',

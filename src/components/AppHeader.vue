@@ -1,10 +1,10 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 
-const emit = defineEmits(['file-selected', 'fit-model', 'locale-change', 'reset-camera'])
+const emit = defineEmits(['locale-change'])
 const { t } = useI18n()
 
-defineProps({
+const props = defineProps({
   currentLocale: {
     type: String,
     required: true
@@ -24,13 +24,6 @@ const localeOptions = [
   { value: 'en-US', labelKey: 'language.enUS' }
 ]
 
-function onFileChange(event) {
-  const file = event.target.files?.[0]
-  if (file) {
-    emit('file-selected', file)
-  }
-  event.target.value = ''
-}
 </script>
 
 <template>
@@ -40,7 +33,7 @@ function onFileChange(event) {
       <p class="subtitle">{{ subtitle }}</p>
     </div>
 
-    <div class="actions">
+    <div class="locale-wrap">
       <div class="locale-switch">
         <button
           v-for="item in localeOptions"
@@ -53,18 +46,6 @@ function onFileChange(event) {
           {{ t(item.labelKey) }}
         </button>
       </div>
-
-      <label class="btn primary">
-        {{ t('actions.importModel') }}
-        <input
-          accept=".glb,.gltf,.obj,.fbx,.stl"
-          class="hidden-input"
-          type="file"
-          @change="onFileChange"
-        />
-      </label>
-      <button class="btn" type="button" @click="emit('reset-camera')">{{ t('actions.resetCamera') }}</button>
-      <button class="btn" type="button" @click="emit('fit-model')">{{ t('actions.fitModel') }}</button>
     </div>
   </header>
 </template>
@@ -97,11 +78,9 @@ function onFileChange(event) {
   font-size: 12px;
 }
 
-.actions {
+.locale-wrap {
   display: flex;
-  flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 8px;
   flex: 0 0 auto;
 }
 
@@ -128,39 +107,6 @@ function onFileChange(event) {
   color: var(--text);
 }
 
-.btn {
-  min-height: 38px;
-  padding: 0 14px;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text);
-  cursor: pointer;
-  transition:
-    transform 0.18s ease,
-    border-color 0.18s ease,
-    background 0.18s ease;
-}
-
-.btn:hover {
-  transform: translateY(-1px);
-  border-color: rgba(143, 201, 255, 0.52);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.btn.primary {
-  display: inline-flex;
-  align-items: center;
-  border: none;
-  color: #052132;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  font-weight: 700;
-}
-
-.hidden-input {
-  display: none;
-}
-
 @media (max-width: 980px) {
   .topbar {
     flex-direction: column;
@@ -168,7 +114,7 @@ function onFileChange(event) {
     padding: 10px 12px;
   }
 
-  .actions {
+  .locale-wrap {
     justify-content: flex-start;
   }
 }

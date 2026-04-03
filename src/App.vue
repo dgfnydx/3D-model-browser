@@ -14,12 +14,15 @@ const subtitle = computed(() => t('app.subtitle'))
 
 const {
   isDragOver,
+  hasAnimation,
+  isAnimationPlaying,
   modelInfo,
   registerStageElements,
   setDragOver,
   handleFile,
   resetCamera,
   fitModel,
+  toggleAnimation,
   showEmptyHint
 } = useModelViewer()
 
@@ -34,10 +37,7 @@ function handleLocaleChange(nextLocale) {
       :current-locale="locale"
       :subtitle="subtitle"
       :title="title"
-      @file-selected="handleFile"
-      @fit-model="fitModel"
       @locale-change="handleLocaleChange"
-      @reset-camera="resetCamera"
     />
 
     <main class="workspace">
@@ -49,7 +49,15 @@ function handleLocaleChange(nextLocale) {
         @set-drag-over="setDragOver"
       />
 
-      <ModelInfoPanel :model-info="modelInfo" />
+      <ModelInfoPanel
+        :has-animation="hasAnimation"
+        :is-animation-playing="isAnimationPlaying"
+        :model-info="modelInfo"
+        @file-selected="handleFile"
+        @fit-model="fitModel"
+        @reset-camera="resetCamera"
+        @toggle-animation="toggleAnimation"
+      />
     </main>
   </div>
 </template>
