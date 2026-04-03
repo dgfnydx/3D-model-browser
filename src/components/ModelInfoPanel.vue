@@ -190,8 +190,10 @@ function onFileChange(event) {
   padding: 14px;
   overflow: auto;
   border: 1px solid var(--line);
-  border-radius: 20px;
-  background: var(--panel);
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(18, 30, 47, 0.96), rgba(10, 18, 32, 0.92)),
+    var(--panel);
   box-shadow: var(--shadow);
   backdrop-filter: blur(16px);
   min-height: 0;
@@ -202,38 +204,43 @@ function onFileChange(event) {
 
 .tool-panel,
 .section-card {
-  padding: 12px;
-  border-radius: 16px;
-  background: var(--panel-strong);
-}
-
-.tool-panel h2 {
-  margin: 0 0 10px;
+  padding: 14px;
+  border: 1px solid rgba(143, 201, 255, 0.08);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(26, 40, 60, 0.9), rgba(15, 27, 44, 0.96)),
+    var(--panel-strong);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 10px 24px rgba(0, 0, 0, 0.14);
 }
 
 .tool-actions {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
 .tool-btn {
-  min-height: 40px;
+  min-height: 42px;
   padding: 0 14px;
   border: 1px solid var(--line-strong);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
   color: var(--text);
   cursor: pointer;
   transition:
     transform 0.18s ease,
     border-color 0.18s ease,
-    background 0.18s ease;
+    background 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .tool-btn:hover {
   transform: translateY(-1px);
   border-color: rgba(143, 201, 255, 0.52);
-  background: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
 }
 
 .tool-btn:disabled {
@@ -250,6 +257,7 @@ function onFileChange(event) {
   color: #052132;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   font-weight: 700;
+  grid-column: 1 / -1;
 }
 
 .hidden-input {
@@ -274,6 +282,14 @@ function onFileChange(event) {
   opacity: 0.5;
 }
 
+.play-checkbox {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgba(143, 201, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
 .play-checkbox input,
 .clip-item input {
   accent-color: var(--accent);
@@ -289,6 +305,16 @@ function onFileChange(event) {
   border: 1px solid rgba(143, 201, 255, 0.08);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.03);
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.clip-item:has(input:checked) {
+  border-color: rgba(103, 213, 255, 0.5);
+  background: linear-gradient(180deg, rgba(103, 213, 255, 0.12), rgba(103, 213, 255, 0.06));
+  transform: translateY(-1px);
 }
 
 .empty-text {
@@ -309,7 +335,17 @@ function onFileChange(event) {
   color: var(--text);
   cursor: pointer;
   font-size: 15px;
+  font-weight: 600;
   text-align: left;
+}
+
+.tool-panel h2,
+.section-toggle > span:first-child {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
 }
 
 .toggle-icon {
@@ -348,27 +384,33 @@ function onFileChange(event) {
 }
 
 .stats div {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 92px) minmax(0, 1fr);
   gap: 14px;
   padding: 10px 12px;
   border: 1px solid rgba(143, 201, 255, 0.08);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.03);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
 }
 
 .stats dt {
   color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .stats dd {
   margin: 0;
   text-align: right;
   word-break: break-word;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .help {
   margin-top: 12px;
+  padding: 2px 2px 0;
 }
 
 .help ul {
@@ -376,6 +418,16 @@ function onFileChange(event) {
   padding-left: 18px;
   color: var(--muted);
   line-height: 1.8;
+}
+
+@media (max-width: 980px) {
+  .tool-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .tool-btn-primary {
+    grid-column: auto;
+  }
 }
 
 @media (max-width: 980px) {
