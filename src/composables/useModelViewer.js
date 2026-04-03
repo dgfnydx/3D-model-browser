@@ -20,6 +20,8 @@ export function useModelViewer() {
   const clock = new THREE.Clock()
 
   const viewer = {
+    axesCamera: null,
+    axesScene: null,
     scene: null,
     camera: null,
     renderer: null,
@@ -28,6 +30,7 @@ export function useModelViewer() {
     animationId: null,
     canvasEl: null,
     panelEl: null,
+    initialViewState: null,
     isReady: false
   }
 
@@ -52,12 +55,40 @@ export function useModelViewer() {
     Object.assign(modelInfo, createEmptyModelInfo())
   }
 
+  function saveCurrentViewState() {
+    if (!viewer.camera || !viewer.controls) return
+
+    viewer.initialViewState = {
+      far: viewer.camera.far,
+      maxDistance: viewer.controls.maxDistance,
+      minDistance: viewer.controls.minDistance,
+      near: viewer.camera.near,
+      position: viewer.camera.position.clone(),
+      target: viewer.controls.target.clone()
+    }
+  }
+
+  function applyViewState(viewState) {
+    if (!viewState || !viewer.camera || !viewer.controls) return
+
+    viewer.camera.near = viewState.near
+    viewer.camera.far = viewState.far
+    viewer.camera.position.copy(viewState.position)
+    viewer.camera.updateProjectionMatrix()
+
+    viewer.controls.target.copy(viewState.target)
+    viewer.controls.minDistance = viewState.minDistance
+    viewer.controls.maxDistance = viewState.maxDistance
+    viewer.controls.update()
+  }
+
   function removeCurrentModel() {
     animationController.clear()
     hasAnimation.value = false
     isAnimationPlaying.value = false
     animationClips.value = []
     activeAnimationIndex.value = -1
+    viewer.initialViewState = null
 
     if (!viewer.currentModelRoot) return
 
@@ -88,6 +119,95 @@ export function useModelViewer() {
     viewer.renderer.setSize(width, height, false)
     viewer.camera.aspect = width / height
     viewer.camera.updateProjectionMatrix()
+    viewer.renderer.setViewport(0, 0, width, height)
+    viewer.renderer.setScissorTest(false)
+  }
+
+  function createAxesGizmo() {
+    const gizmoGroup = new THREE.Group()
+
+    const center = new THREE.Mesh(
+      new THREE.SphereGeometry(0.09, 24, 24),
+      new THREE.MeshStandardMaterial({
+        color: 0xe9f4ff,
+        emissive: 0x17324f,
+        metalness: 0.15,
+        roughness: 0.25
+      })
+    )
+    gizmoGroup.add(center)
+
+    const plate = new THREE.Mesh(
+      new THREE.CircleGeometry(1.2, 48),
+      new THREE.MeshBasicMaterial({
+        color: 0x08131f,
+        opacity: 0.72,
+        transparent: true
+      })
+    )
+    plate.position.z = -0.02
+    gizmoGroup.add(plate)
+
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(0.82, 0.92, 48),
+      new THREE.MeshBasicMaterial({
+        color: 0x17324a,
+        opacity: 0.9,
+        transparent: true
+      })
+    )
+    ring.position.z = -0.015
+    gizmoGroup.add(ring)
+
+    const axisConfigs = [
+      { color: 0xff6b6b, direction: new THREE.Vector3(1, 0, 0) },
+      { color: 0x59d98e, direction: new THREE.Vector3(0, 1, 0) },
+      { color: 0x58b8ff, direction: new THREE.Vector3(0, 0, 1) }
+    ]
+
+    axisConfigs.forEach(({ color, direction }) => {
+      const material = new THREE.MeshStandardMaterial({
+        color,
+        emissive: color,
+        emissiveIntensity: 0.16,
+        metalness: 0.2,
+        roughness: 0.35
+      })
+
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.58, 16), material)
+      shaft.position.copy(direction.clone().multiplyScalar(0.34))
+
+      if (direction.x !== 0) {
+        shaft.rotation.z = Math.PI / 2
+      } else if (direction.z !== 0) {
+        shaft.rotation.x = Math.PI / 2
+      }
+
+      const head = new THREE.Mesh(new THREE.ConeGeometry(0.075, 0.2, 20), material)
+      head.position.copy(direction.clone().multiplyScalar(0.72))
+
+      if (direction.x > 0) {
+        head.rotation.z = -Math.PI / 2
+      } else if (direction.z > 0) {
+        head.rotation.x = Math.PI / 2
+      }
+
+      const tip = new THREE.Mesh(
+        new THREE.SphereGeometry(0.045, 16, 16),
+        new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          emissive: color,
+          emissiveIntensity: 0.35,
+          metalness: 0.1,
+          roughness: 0.2
+        })
+      )
+      tip.position.copy(direction.clone().multiplyScalar(0.86))
+
+      gizmoGroup.add(shaft, head, tip)
+    })
+
+    return gizmoGroup
   }
 
   function setupScene() {
@@ -152,7 +272,42 @@ export function useModelViewer() {
     minorGrid.material.transparent = true
     viewer.scene.add(minorGrid)
 
+    viewer.axesScene = new THREE.Scene()
+    viewer.axesCamera = new THREE.PerspectiveCamera(42, 1, 0.1, 10)
+    viewer.axesScene.add(createAxesGizmo())
+
+    const gizmoAmbient = new THREE.AmbientLight(0xffffff, 1.45)
+    const gizmoKey = new THREE.DirectionalLight(0xffffff, 1.8)
+    gizmoKey.position.set(2, 2, 3)
+    const gizmoFill = new THREE.DirectionalLight(0x7fc7ff, 0.8)
+    gizmoFill.position.set(-2, 1, 2)
+    viewer.axesScene.add(gizmoAmbient, gizmoKey, gizmoFill)
+
     resizeRenderer()
+  }
+
+  function renderAxesGizmo() {
+    if (!viewer.renderer || !viewer.camera || !viewer.axesCamera || !viewer.axesScene || !viewer.panelEl) return
+
+    const rect = viewer.panelEl.getBoundingClientRect()
+    const size = Math.max(84, Math.min(112, Math.floor(Math.min(rect.width, rect.height) * 0.18)))
+    const margin = 14
+
+    const direction = new THREE.Vector3()
+    viewer.camera.getWorldDirection(direction)
+
+    viewer.axesCamera.position.copy(direction.clone().multiplyScalar(-2.7))
+    viewer.axesCamera.up.copy(viewer.camera.up)
+    viewer.axesCamera.lookAt(0, 0, 0)
+    viewer.axesCamera.updateProjectionMatrix()
+
+    viewer.renderer.clearDepth()
+    viewer.renderer.setScissorTest(true)
+    viewer.renderer.setViewport(margin, margin, size, size)
+    viewer.renderer.setScissor(margin, margin, size, size)
+    viewer.renderer.render(viewer.axesScene, viewer.axesCamera)
+    viewer.renderer.setScissorTest(false)
+    viewer.renderer.setViewport(0, 0, rect.width, rect.height)
   }
 
   function animate() {
@@ -161,6 +316,7 @@ export function useModelViewer() {
     animationController.update(clock.getDelta())
     viewer.controls.update()
     viewer.renderer.render(viewer.scene, viewer.camera)
+    renderAxesGizmo()
     viewer.animationId = window.requestAnimationFrame(animate)
   }
 
@@ -180,6 +336,7 @@ export function useModelViewer() {
       viewer.scene.add(viewer.currentModelRoot)
 
       normalizeAndFrameModel(viewer.currentModelRoot, viewer.camera, viewer.controls)
+      saveCurrentViewState()
 
       animationClips.value = animations.map((clip, index) => ({
         index,
@@ -204,6 +361,11 @@ export function useModelViewer() {
   }
 
   function resetCamera() {
+    if (viewer.initialViewState) {
+      applyViewState(viewer.initialViewState)
+      return
+    }
+
     viewer.camera.position.set(2.6, 1.9, 3.4)
     viewer.controls.target.set(0, 0.8, 0)
     viewer.controls.minDistance = 0.2
@@ -214,6 +376,7 @@ export function useModelViewer() {
   function fitModel() {
     if (viewer.currentModelRoot) {
       normalizeAndFrameModel(viewer.currentModelRoot, viewer.camera, viewer.controls)
+      saveCurrentViewState()
     }
   }
 
@@ -250,6 +413,8 @@ export function useModelViewer() {
     viewer.controls?.dispose()
     removeCurrentModel()
     viewer.renderer?.dispose()
+    viewer.axesCamera = null
+    viewer.axesScene = null
     viewer.isReady = false
   }
 
